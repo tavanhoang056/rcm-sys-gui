@@ -23,6 +23,7 @@ def display_users(df):
     st.write(df)
 
 def select_product(df):
+    st.write('\n\n')
     st.markdown("#### 2️⃣ Select Product")
     product_options = [('none', '📋 Select a product')] + [(row['product_id'], row['product_name']) for index, row in df.iterrows()]
     selected_product = st.selectbox(
@@ -34,6 +35,7 @@ def select_product(df):
     return selected_product[0]
 
 def select_user(df):
+    st.write('\n\n')
     st.markdown("#### 1️⃣ Select User")
     user_options = [(0, 'guest')] + [(row['user_id'], row['user_name']) for index, row in df.iterrows()]
     selected_user = st.selectbox(
@@ -45,6 +47,7 @@ def select_user(df):
     return selected_user[0]
 
 def search_products():
+    st.write('\n\n')
     st.markdown("#### 3️⃣ Search Products")
     return st.text_input("🔍 Enter search keywords")
 
@@ -131,6 +134,7 @@ def display_project_overview():
 
 def display_recommendation_app():
     st.subheader('🌟 Welcome to our product — we invite you to explore and enjoy the experience!')
+    st.image('data/shopee-banner.jpg')
     df_products = get_products();
     if 'random_products' not in st.session_state:
         st.session_state.random_products = get_random_products(df_products);
