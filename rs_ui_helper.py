@@ -24,64 +24,80 @@ DEFAULT_IMAGE_BASE64 = f"data:image/png;base64,{get_image_as_base64(DEFAULT_IMAG
 
 def display_user_card(user):
     with st.container():
-        st.write("Bạn chọn User: ", user)
+        st.write("Selected User: ", user)
 
 
 def display_product_card(product):
-    with st.container():
-        st.markdown("""
-        <style>
-        .main-card {
-            background-color: #1E1E1E;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 10px 0;
-            color: white;
-            display: flex;
-            align-items: start;
-            gap: 20px;
-        }
-        .main-card img {
-            width: 300px;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .main-content {
-            flex: 1;
-        }
-        .main-title {
-            font-size: 24px;
-            color: white;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-        .main-price {
-            color: #00CA4E;
-            font-weight: bold;
-            font-size: 20px;
-            margin: 10px 0;
-        }
-        .main-info {
-            color: #fafafa;
-            margin: 8px 0;
-            font-size: 16px;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(f"""
-        <div class="main-card">
-            <img src="{product['image'].iloc[0] if pd.notna(product['image'].iloc[0]) else DEFAULT_IMAGE_BASE64}" 
-                 alt="Product Image">
-            <div class="main-content">
-                <div class="main-title">{product['product_name'].iloc[0]}</div>
-                <div class="main-price">{product['price'].iloc[0]:,.0f}đ</div>
-                <div class="main-info"><b>Mã sản phẩm:</b> {product['product_id'].iloc[0]}</div>
-                <div class="main-info"><b>Mô tả:</b> {product['Content_wt'].iloc[0][:100]}...</div>
+    if product.empty:
+        st.write("ℹ️ Please select a product to view details")
+    else:
+        with st.container():
+            st.markdown("""
+            <style>
+            .main-card {
+                background-color: #1E1E1E;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 10px 0;
+                color: white;
+                display: flex;
+                align-items: start;
+                gap: 20px;
+            }
+            .main-card img {
+                width: 300px;
+                height: 300px;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+            .main-content {
+                flex: 1;
+            }
+            .main-title {
+                font-size: 24px;
+                color: white;
+                margin: 10px 0;
+                font-weight: bold;
+            }
+            .main-price {
+                color: #00CA4E;
+                font-weight: bold;
+                font-size: 20px;
+                margin: 10px 0;
+            }
+            .main-info {
+                color: #fafafa;
+                margin: 8px 0;
+                font-size: 16px;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+
+            # description = ''
+            # if product.description_clean.empty:
+            #     description = str(product.description_clean)[:100] + "..."
+            # else:
+            #     description = "No description available."
+
+            # image = ""
+            # if product.image.empty:
+            #     image = product.image
+            # else:
+            #     image = DEFAULT_IMAGE_BASE64
+
+            st.markdown(f"""
+            <div class="main-card">
+                <img src="{product['image'].iloc[0] if pd.notna(product['image'].iloc[0]) else DEFAULT_IMAGE_BASE64}" 
+                    alt="Product Image">
+                <div class="main-content">
+                    <div class="main-title">{product['product_name'].iloc[0]}</div>
+                    <div class="main-price">{product['price'].iloc[0]:,.0f}đ</div>
+                    <div class="main-info"><b>Mã sản phẩm:</b> {product['product_id'].iloc[0]}</div>
+                    <div class="main-info"><b>Mô tả:</b> {str(product['description_clean'].iloc[0])[:100] + "..." if pd.notna(product['description_clean'].iloc[0]) else "No description available"}</div>
+                </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 
 def display_product_cards(products, cols=4):
@@ -131,10 +147,17 @@ def display_product_cards(products, cols=4):
                 </div>
                 """, unsafe_allow_html=True)
 
-                expander = st.expander(f"Chi tiết")
-                expander.write(f"Mã SP: {product.product_id}")
-                expander.write(product.Content_wt[:100] + "...")
-                expander.markdown("Nhấn vào mũi tên để đóng hộp text này.")       
+                expander = st.expander("Details")
+                expander.write(f"Product ID: {product.product_id}")
+                if pd.notna(product.description_clean):
+                    expander.write(str(product.description_clean[:100] + "..."))
+                else:
+                    expander.write("No description available.")
+                expander.markdown("Click the arrow to close this text box.")   
+                
+                # st.write(product)
+
+
             
 
 def display_product_by_users_cards(products, cols=4):
@@ -200,27 +223,27 @@ def display_product_by_users_cards(products, cols=4):
 
 def display_recommended_products(df, recommendation_products):
     if recommendation_products is not None:
-        st.write("\n**Có thể bạn cũng thích:** ")
+        st.write("\n**💡 You may also like:** ")
         recommended_products = df[df['product_id'].isin(recommendation_products['product_id'])]
         display_product_cards(recommended_products, cols=3)
     else:
-        st.write(f"Không tìm thấy sản phẩm")
+        st.write("⚠️ No products found")
 
 
 def display_seach_products(df, recommendation_products, keyword):
     if recommendation_products is not None:
-        st.write(f"\n**Kết quả tìm kiếm cho '{keyword}:'**")
+        st.write(f"\n**🔎 Search results for '{keyword}':**")
         recommended_products = df[df['product_id'].isin(recommendation_products['product_id'])]
         display_product_cards(recommended_products, cols=3)
     else:
-        st.write(f"Không tìm thấy sản phẩm")
+        st.write("⚠️ No products found")
 
 
 def display_recommended_user(df, recommendation_products):
     if recommendation_products is not None:
-        st.write(f"\n**Người dùng cũng chọn:**")
+        st.write(f"\n**👥 Users also chose:**")
         display_product_cards(recommendation_products, cols=3)
         
     else:
-        st.write(f"Không tìm thấy sản phẩm")
+        st.write("⚠️ No products found")
 

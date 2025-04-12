@@ -56,7 +56,7 @@ def get_similarity_scores(sims, top_k, exclude_idx=None):
 
 def format_recommendations(df, sim_scores):
     product_indices = [i[0] for i in sim_scores]
-    recommendations = df.iloc[product_indices][['product_id', 'product_name', 'category', 'sub_category', 'Content_wt']]
+    recommendations = df.iloc[product_indices][['product_id', 'product_name', 'category', 'sub_category', 'description_clean', 'Content_wt']]
     recommendations['similarity_score'] = [i[1] for i in sim_scores]
     return recommendations
 
@@ -94,12 +94,11 @@ def get_content_based_recommendations_by_keyword(keyword, df, top_k=5):
     return format_recommendations(df, sim_scores)
 
 
-def get_collaborative_filtering_recommendations(product_id, user_id, df_products, df_users, top_k=5):
+def get_collaborative_filtering_recommendations(user_id, df_products, df_users, top_k=5):
     """
     Recommend top_k similar products for a user based on a selected product
     
     Args:
-        product_id: ID of the selected product
         user_id: ID of the user
         df_products: DataFrame containing all product details
         df: DataFrame containing user-item interactions
@@ -124,7 +123,7 @@ def get_collaborative_filtering_recommendations(product_id, user_id, df_products
     predictions.sort(key=lambda x: x[1], reverse=True)
 
     # Filter out the input product and get top k product IDs
-    recommended_ids = [p[0] for p in predictions if p[0] != product_id][:top_k]
+    recommended_ids = [p[0] for p in predictions][:top_k]
     
     # Get the full product details from df_products
     recommendations = df_products[df_products['product_id'].isin(recommended_ids)]
