@@ -3,6 +3,7 @@ numpy
 pandas
 matplotlib
 seaborn
+spicy
 scikit-learn
 scikit-surprise
 underthesea
