@@ -69,14 +69,17 @@ def process_keyword_query(query, dictionary, stop_words):
                    and len(token) > 1]
     
     if len(query_tokens) == 0:
-        print("Warning: Query too short or contains only stop words")
+        st.write("⚠️ Oops! Your search is too short. Try using more words!")
+        return None
     
     if len(query_tokens) > 10:
-        print("Warning: Long queries may reduce accuracy. Consider using fewer terms.")
+        st.write("⚠️ Oops! Your search is too long and might not work well. Try using fewer words!")
+        return None
     
     query_bow = dictionary.doc2bow(query_tokens)
     if len(query_bow) == 0:
-        print("Warning: No valid keywords found after processing")
+        st.write("⚠️ Oops! We couldn’t find any useful words in your search. Try different words!")
+        return None
         
     return query_bow
 
@@ -89,6 +92,8 @@ def get_content_based_recommendations_by_id(id, df, top_k=5):
 
 def get_content_based_recommendations_by_keyword(keyword, df, top_k=5):
     query_bow = process_keyword_query(keyword, dictionary, stop_words)
+    if query_bow is None:
+        return None
     sims = similarity_matrix[tfidf[query_bow]]
     sim_scores = get_similarity_scores(sims, top_k)
     return format_recommendations(df, sim_scores)
