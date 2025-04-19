@@ -9,6 +9,9 @@ import os
 from PIL import Image
 import base64
 import io
+import json
+from wordcloud import WordCloud
+
 
 def get_image_as_base64(image_path):
     img = Image.open(image_path)
@@ -246,4 +249,112 @@ def display_recommended_user(df, recommendation_products):
         
     else:
         st.write("⚠️ No products found")
+        
+def display_box_overview(df_products, df_users):
+    
+    total_products = df_products['product_id'].nunique()
+    total_users = df_users['user_id'].nunique()
+    total_ratings = df_users['rating'].count()
+    avg_rating = df_users['rating'].mean()
+    
+    # Custom card CSS
+    st.markdown("""
+        <style>
+        .overview-card {
+            padding: 30px 20px;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .overview-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+        .overview-icon {
+            font-size: 40px;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+        .overview-title {
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        .overview-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #212529;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Layout
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.markdown(f"""
+            <div class="overview-card">
+                <div class="overview-icon">📦</div>
+                <div class="overview-title">TOTAL PRODUCTS</div>
+                <div class="overview-value">{total_products:,}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(f"""
+            <div class="overview-card">
+                <div class="overview-icon">👥</div>
+                <div class="overview-title">TOTAL USERS</div>
+                <div class="overview-value">{total_users:,}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f"""
+            <div class="overview-card">
+                <div class="overview-icon">⭐</div>
+                <div class="overview-title">TOTAL RATINGS</div>
+                <div class="overview-value">{total_ratings:,}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown(f"""
+            <div class="overview-card">
+                <div class="overview-icon">🌟</div>
+                <div class="overview-title">AVERAGE RATING</div>
+                <div class="overview-value">{avg_rating:.1f}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+
+
+def display_model_evaluations(data_list):
+    """
+    Displays a dynamic, interactive model evaluation table using st.dataframe().
+    """
+    df = pd.DataFrame(data_list)
+
+    # Simulate merged cells: clear repeated "Method" values
+    df["Method"] = df["Method"].mask(df["Method"].duplicated(), "")
+
+    st.markdown("## 📊 Model Evaluations")
+    st.dataframe(df, use_container_width=True)
+        
+    
+model_data = [
+    {"Method": "Collaborative filtering", "Model": "SVD", "Results": "RMSE = 0.88\ntime = 4 min",
+     "Comments": "Performed well after tuning.", "Pros": "Easy to use with sparse data",
+     "Cons": "Slower on large datasets"},
+    {"Method": f"Collaborative filtering", "Model": "ALS", "Results": "RMSE = 1.14\ntime = 4.1 min",
+     "Comments": "Scalable for large datasets", "Pros": "Works with Spark", "Cons": "Lower accuracy"},
+    {"Method": "Content-based filtering", "Model": "Gensim", "Results": "Score: 0.2–0.4",
+     "Comments": "Semantic similarity", "Pros": "Understands meaning", "Cons": "Needs clean input"},
+    {"Method": "Content-based filtering", "Model": "Cosine similarity", "Results": "Score: 0.2–0.4",
+     "Comments": "Simple to use", "Pros": "Fast and interpretable", "Cons": "Purely vector-based"},
+]
+
 

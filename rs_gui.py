@@ -4,6 +4,7 @@ from rs_helper import *
 from rs_ui_helper import *
 from streamlit_option_menu import option_menu
 
+
 def get_products():
     return pd.read_csv('data/items.csv');
 
@@ -86,52 +87,57 @@ def get_recommendation_products_by_keyword(keyword, df):
     else:
         return None
  
+
+        
 def display_project_overview():
+    st.image("data/shopee.png")
     st.subheader("Business Objective")
-    
     st.markdown("🌟 **Shopee** is an 'all-in-one' e-commerce ecosystem and a leading platform in Southeast Asia. Among its services, **``shopee.vn``** is one of the top e-commerce websites in Vietnam.")
-    st.image('data/shopee.png')
     st.markdown("🔑 Challenge: Shopee hasn’t rolled out a Recommender System yet – how would you build one to revolutionize their platform?")
     st.markdown("🎯 **Goal**: Create a system that delivers personalized product suggestions to delight every user!")
-    tab1, tab2, tab3, tab4 = st.tabs(['Methodology', 'Data Exploration', 'Gensim Model', 'Surprise SVD Model'])
+    tab1, tab2, tab3 = st.tabs(['Methodology', 'Data Exploration', 'Recommendation Models'])
 
 
     df_products = get_products();
+    df_users = get_users();
     if 'random_products' not in st.session_state:
         st.session_state.random_products = get_random_products(df_products);
 
     with tab1:
-        st.write("#### Content-based Filtering using Cosine Similarity (Gensim Model)")
-        st.image('data/rs-cbf.png')
-        st.write("#### Collaborative Filtering")
-        st.image('data/rs-cf.png')
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("#### Content-based Filtering")
+            st.image('data/rs-cbf.png')
+        with col2:
+            st.write("#### Collaborative Filtering")
+            st.image('data/rs-cf.png')
 
     with tab2:
-        st.write("#### Dataset")
+        st.write("## Dataset")
         display_products(st.session_state.random_products)
-        st.write("#### Charts")
-        st.write("##### Top Words")
+        st.write("## Overview")
+        display_box_overview(df_products, df_users)
+        st.write()
+        st.write("## Top Words")
         st.image('data/keyword-wordcloud.png')
-        st.write("##### Top Products")
+        st.write("## Top Products")
         st.image('data/rs-products.png')
-        st.write("##### Top Ratings")
+        st.write("## Top Ratings")
         st.image('data/rs-ratings.png')
-        st.write("##### Top Prices")
+        st.write("## Top Prices")
         st.image('data/rs-prices.png')
-        st.write("##### Most and Least")
+        st.write("## Most and Least Subcategories")
         st.image('data/rs-most.png')
         st.image('data/rs-least.png')
+        
     with tab3:
-        st.write("#### Charts")
+        display_model_evaluations(model_data)
+        st.markdown('## SVD model - Collaborative Filtering') 
+        st.image('data/svd-model.jpg')
+        st.markdown('## Gensim model - Content-based Filtering') 
         st.image('data/rs-gensim-chart.png')
-        st.write("#### Recommendation by ID")
-        st.image('data/rs-gensim-id.png')
-        st.write("#### Recommendation by Keyword")
-        st.image('data/rs-gensim-keyword.png')
-    with tab4:
-        st.write("#### Recommendation for User")
-        st.image('data/rs-svd.png')
-
+        
+        
 def display_recommendation_app():
     st.subheader('🌟 Welcome to our product — we invite you to explore and enjoy the experience!')
     st.image('data/shopee-banner.jpg')
@@ -213,10 +219,9 @@ def display_sidebar():
 def main():
     st.set_page_config(
         page_title='Shopee Recommendation System',
-        # layout='wide',
+        layout='wide',
         initial_sidebar_state='expanded'
     )
-
     st.title("💡🛍️ Shopee Recommendation System")
     display_sidebar()
 
